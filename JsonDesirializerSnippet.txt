@@ -1,0 +1,36 @@
+ private class Color
+    {
+        public string title { get; set; }
+    }
+	
+	public static async Task<IList<Dictionary<string, object>>> GetColorsAsync()
+        {
+            List<Dictionary<string, object>> lookups = new List<Dictionary<string, object>>();
+            using (HttpClient client = new HttpClient())
+            {
+                client.BaseAddress = new Uri("https://jsonplaceholder.typicode.com/");
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                var response = await client.GetAsync("posts");
+                if (response.IsSuccessStatusCode)
+                {
+                    var data = await response.Content.ReadAsStringAsync();
+
+                    var s = new System.Web.Script.Serialization.JavaScriptSerializer();
+                    List<Color> title = s.Deserialize<List<Color>>(data);
+
+                    for (var i =0; i < title.Count; i++)
+                    {
+                        Dictionary<string, object> lookup = new Dictionary<string, object>();
+                        lookup.Add("LookupValue", title[i]);
+                        lookups.Add(lookup);
+                    }
+            }
+                else
+                {
+                    //Something has gone wrong
+                    //i have to handle this error
+                }
+            }
+            return lookups.AsReadOnly();
+        }
